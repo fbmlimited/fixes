@@ -16,6 +16,60 @@ codeunit 61501 FBM_Fixes
 
     end;
 
+    procedure dimonoff(seton: Boolean)
+    var
+        defdim: record "Default Dimension";
+        comp: record Company;
+    begin
+        comp.FindFirst();
+        repeat
+            defdim.ChangeCompany(comp.Name);
+            defdim.SetRange("Table ID", 15);
+
+            if defdim.FindFirst() then
+                repeat
+
+                    if defdim."Value Posting" = defdim."Value Posting"::"Code Mandatory" then begin
+                        defdim.FBM_Marked := true;
+                        defdim.Modify();
+                    end;
+                    if seton then begin
+                        if defdim.FBM_Marked then
+                            defdim."Value Posting" := defdim."Value Posting"::"Code Mandatory";
+
+                    end
+                    else
+                        if defdim.FBM_Marked then
+                            defdim."Value Posting" := defdim."Value Posting"::" ";
+                    defdim.Modify()
+                until defdim.Next() = 0;
+        until comp.Next() = 0;
+
+    end;
+
+    procedure setsite()
+    var
+        sinv: record "Sales Invoice Header";
+        cle: record "Cust. Ledger Entry";
+        comp: record Company;
+    begin
+        comp.FindFirst();
+        repeat
+            cle.ChangeCompany(comp.Name);
+            sinv.ChangeCompany(comp.Name);
+            if cle.FindFirst() then
+                repeat
+                    if sinv.get(cle."Document No.") then
+                        if sinv.FBM_Site <> '' then begin
+                            cle.FBM_Site := sinv.FBM_Site;
+                            cle.Modify();
+                        end;
+                until cle.Next() = 0;
+
+        until comp.Next() = 0;
+        message('done');
+    end;
+
     procedure setnames()
     var
         customer: record Customer;

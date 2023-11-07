@@ -25,6 +25,21 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
     {
         addlast(processing)
         {
+            action("setsites")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.setsite();
+
+
+                end;
+
+            }
+
             action("setnames")
             {
                 ApplicationArea = all;
