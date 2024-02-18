@@ -228,6 +228,17 @@ page 61500 CustCard
                     Xmlport.run(60101, true, true);
                 end;
             }
+            action(fixvat)
+            {
+                ApplicationArea = All;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixvat();
+                end;
+            }
             action(importFA)
             {
                 ApplicationArea = All;

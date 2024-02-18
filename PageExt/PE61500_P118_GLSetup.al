@@ -25,6 +25,20 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
     {
         addlast(processing)
         {
+            action("DELBANK")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.delbankerr();
+                    message('done');
+
+                end;
+
+            }
             action("setsites")
             {
                 ApplicationArea = all;
@@ -93,7 +107,8 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 var
                     fix: Codeunit FBM_Fixes;
                 begin
-                    fix.fixacystrange();
+                    fix.fixacy2();
+                    ;
                     message('done');
 
 
@@ -113,6 +128,46 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
 
 
 
+                end;
+
+            }
+            action("Propagate Group")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.propgroup();
+
+
+
+
+                end;
+
+            }
+            action(vendoreur)
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixeurvendor();
+                end;
+
+            }
+            action(fixdatesTR8)
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixdatesdaymonth();
                 end;
 
             }
