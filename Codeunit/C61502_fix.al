@@ -461,7 +461,7 @@ codeunit 61501 FBM_Fixes
                         cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
                         cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
                         cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
-                        cexch2.Insert()();
+                        cexch2.Insert();
                     end;
 
                 until cexch.Next() = 0;
@@ -854,6 +854,41 @@ codeunit 61501 FBM_Fixes
                 if bankle.Amount <> bankle."Amount (LCY)" then begin
                     cc += 1;
                     bankle.validate("Amount (LCY)", bankle.Amount);
+
+
+                    bankle.Modify();
+                end;
+            until bankle.Next() = 0;
+        Message(format(cc));
+    end;
+
+    procedure fixentries2()
+    var
+
+        cc: Integer;
+        bankle: record "Bank Account Ledger Entry";
+        gle: record "G/L Entry";
+        exchrate: record "Currency Exchange Rate";
+    begin
+        cc := 0;
+        bankle.SetRange("Posting Date", DMY2Date(11, 03, 2024));
+        bankle.SetRange("Currency Code", 'USD');
+        if bankle.FindFirst() then
+            repeat
+
+                if bankle.Amount <> bankle."Amount (LCY)" then begin
+                    cc += 1;
+                    bankle.validate("Amount (LCY)", bankle.Amount);
+                    gle.SetRange("Document No.", bankle."Document No.");
+                    gle.SetRange("Posting Date", DMY2Date(11, 03, 2024));
+                    if gle.FindFirst() then
+                        repeat
+                            gle.validate(Amount, gle.Amount / 55.889);
+                            exchrate.get('EUR', gle."Posting Date");
+                            gle.validate("Additional-Currency Amount", gle.Amount * exchrate."Exchange Rate Amount");
+                            gle.Modify();
+                        until gle.Next() = 0;
+
 
                     bankle.Modify();
                 end;

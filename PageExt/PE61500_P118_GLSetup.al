@@ -213,7 +213,7 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 end;
 
             }
-            action("fixentries")
+            action("fixentries2")
             {
                 ApplicationArea = all;
                 trigger
@@ -221,7 +221,7 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 var
                     fix: Codeunit FBM_Fixes;
                 begin
-                    fix.fixentries();
+                    fix.fixentries2();
 
                 end;
 

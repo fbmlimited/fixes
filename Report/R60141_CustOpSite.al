@@ -1,8 +1,7 @@
 report 60141 FBM_CustOpsite_FIX
 {
     Caption = 'CustOpSite';
-    UsageCategory = Administration;
-    ApplicationArea = All;
+
     ProcessingOnly = true;
     Permissions = tabledata 70002 = rimd;
 
