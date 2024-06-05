@@ -1,4 +1,4 @@
-page 61500 CustCard
+page 61508 CustCard
 {
     Caption = 'Cust Card temp';
     PageType = Card;

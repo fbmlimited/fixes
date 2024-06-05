@@ -1,6 +1,6 @@
 codeunit 61501 FBM_Fixes
 {
-    Permissions = tabledata "Value Entry" = rimd, tabledata "VAT Entry" = rimd, tabledata "Detailed Cust. Ledg. Entry" = rimd, tabledata "Bank Account Ledger Entry" = rimd, tabledata "Purch. Inv. Line" = rimd, tabledata "G/L Entry" = rimd, tabledata "Sales Invoice Header" = rimd, tabledata "Purch. Cr. Memo Hdr." = RIMD, tabledata "Purch. Inv. Header" = RIMD, tabledata "G/L Account" = rimd, tabledata "Vendor Ledger Entry" = rimd;
+    Permissions = tabledata "FA Depreciation Book" = rimd, tabledata "Sales Cr.Memo Header" = rimd, tabledata "Value Entry" = rimd, tabledata "VAT Entry" = rimd, tabledata "Detailed Cust. Ledg. Entry" = rimd, tabledata "Bank Account Ledger Entry" = rimd, tabledata "Purch. Inv. Line" = rimd, tabledata "G/L Entry" = rimd, tabledata "Sales Invoice Header" = rimd, tabledata "Purch. Cr. Memo Hdr." = RIMD, tabledata "Purch. Inv. Header" = RIMD, tabledata "G/L Account" = rimd, tabledata "Vendor Ledger Entry" = rimd;
 
 
 
@@ -24,29 +24,29 @@ codeunit 61501 FBM_Fixes
         defdim: record "Default Dimension";
         comp: record Company;
     begin
-        comp.FindFirst();
-        repeat
-            defdim.ChangeCompany(comp.Name);
-            defdim.SetRange("Table ID", 15);
+        // comp.FindFirst();
+        // repeat
+        // defdim.ChangeCompany(comp.Name);
+        defdim.SetRange("Table ID", 15);
 
-            if defdim.FindFirst() then
-                repeat
+        if defdim.FindFirst() then
+            repeat
 
-                    if defdim."Value Posting" = defdim."Value Posting"::"Code Mandatory" then begin
-                        defdim.FBM_Marked := true;
-                        defdim.Modify();
-                    end;
-                    if seton then begin
-                        if defdim.FBM_Marked then
-                            defdim."Value Posting" := defdim."Value Posting"::"Code Mandatory";
+                if defdim."Value Posting" = defdim."Value Posting"::"Code Mandatory" then begin
+                    defdim.FBM_Marked := true;
+                    defdim.Modify();
+                end;
+                if seton then begin
+                    if defdim.FBM_Marked then
+                        defdim."Value Posting" := defdim."Value Posting"::"Code Mandatory";
 
-                    end
-                    else
-                        if defdim.FBM_Marked then
-                            defdim."Value Posting" := defdim."Value Posting"::" ";
-                    defdim.Modify()
-                until defdim.Next() = 0;
-        until comp.Next() = 0;
+                end
+                else
+                    if defdim.FBM_Marked then
+                        defdim."Value Posting" := defdim."Value Posting"::" ";
+                defdim.Modify()
+            until defdim.Next() = 0;
+        // until comp.Next() = 0;
 
     end;
 
@@ -418,19 +418,20 @@ codeunit 61501 FBM_Fixes
     begin
         comp.findfirst;
         repeat
+
             cinfo.changecompany(comp.name);
             cinfo.get();
             cexch.changecompany(comp.name);
             cexch2.changecompany(comp.name);
-            cexch.SetRange("Starting Date", DMY2Date(15, 03, 2024));
-            cexch2.SetRange("Starting Date", DMY2Date(16, 03, 2024));
+            cexch.SetRange("Starting Date", DMY2Date(Date2DMY(calcdate('-1D', Today), 1), Date2DMY(calcdate('-1D', Today), 2), Date2DMY(calcdate('-1D', Today), 3)));
+            cexch2.SetRange("Starting Date", Today);
 
             if cexch.FindFirst() then
                 repeat
                     cexch2.SetRange("Currency Code", cexch."Currency Code");
                     if not cexch2.FindFirst() then begin
                         cexch2.init;
-                        cexch2."Starting Date" := DMY2Date(16, 03, 2024);
+                        cexch2."Starting Date" := Today;
                         cexch2."Currency Code" := cexch."Currency Code";
                         cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
                         cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
@@ -442,29 +443,29 @@ codeunit 61501 FBM_Fixes
                     end;
 
                 until cexch.Next() = 0;
-            message('Done 16/3');
-            cexch.Reset();
-            cexch2.Reset();
-            cexch.SetRange("Starting Date", DMY2Date(15, 03, 2024));
-            cexch2.SetRange("Starting Date", DMY2Date(17, 03, 2024));
+            // message('Done 16/3');
+            // cexch.Reset();
+            // cexch2.Reset();
+            // cexch.SetRange("Starting Date", DMY2Date(15, 03, 2024));
+            // cexch2.SetRange("Starting Date", DMY2Date(17, 03, 2024));
 
-            if cexch.FindFirst() then
-                repeat
-                    cexch2.SetRange("Currency Code", cexch."Currency Code");
-                    if not cexch2.FindFirst() then begin
-                        cexch2.init;
-                        cexch2."Starting Date" := DMY2Date(17, 03, 2024);
-                        cexch2."Currency Code" := cexch."Currency Code";
-                        cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
-                        cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
-                        cexch2."Relational Currency Code" := cexch."Relational Currency Code";
-                        cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
-                        cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
-                        cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
-                        cexch2.Insert();
-                    end;
+            // if cexch.FindFirst() then
+            //     repeat
+            //         cexch2.SetRange("Currency Code", cexch."Currency Code");
+            //         if not cexch2.FindFirst() then begin
+            //             cexch2.init;
+            //             cexch2."Starting Date" := DMY2Date(17, 03, 2024);
+            //             cexch2."Currency Code" := cexch."Currency Code";
+            //             cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
+            //             cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
+            //             cexch2."Relational Currency Code" := cexch."Relational Currency Code";
+            //             cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
+            //             cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
+            //             cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
+            //             cexch2.Insert();
+            //         end;
 
-                until cexch.Next() = 0;
+            //     until cexch.Next() = 0;
             // message('Done 9/3');
             // cexch.Reset();
             // cexch2.Reset();
@@ -869,6 +870,7 @@ codeunit 61501 FBM_Fixes
         bankle: record "Bank Account Ledger Entry";
         gle: record "G/L Entry";
         exchrate: record "Currency Exchange Rate";
+        amt: decimal;
     begin
         cc := 0;
         bankle.SetRange("Posting Date", DMY2Date(11, 03, 2024));
@@ -876,23 +878,75 @@ codeunit 61501 FBM_Fixes
         if bankle.FindFirst() then
             repeat
 
-                if bankle.Amount <> bankle."Amount (LCY)" then begin
-                    cc += 1;
-                    bankle.validate("Amount (LCY)", bankle.Amount);
-                    gle.SetRange("Document No.", bankle."Document No.");
-                    gle.SetRange("Posting Date", DMY2Date(11, 03, 2024));
-                    if gle.FindFirst() then
-                        repeat
-                            gle.validate(Amount, gle.Amount / 55.889);
-                            exchrate.get('EUR', gle."Posting Date");
-                            gle.validate("Additional-Currency Amount", gle.Amount * exchrate."Exchange Rate Amount");
-                            gle.Modify();
-                        until gle.Next() = 0;
+                //if bankle.Amount <> bankle."Amount (LCY)" then begin
+                cc += 1;
+                bankle.validate("Amount (LCY)", bankle.Amount);
+                gle.SetRange("Document No.", bankle."Document No.");
+                gle.SetRange("Source Code", bankle."Source Code");
+                gle.SetRange("Posting Date", DMY2Date(11, 03, 2024));
+                if gle.FindFirst() then
+                    repeat
+                        amt := gle.Amount;
+                        gle.validate(Amount, amt / 55.889);
+
+                        exchrate.get('EUR', gle."Posting Date");
+                        gle."Additional-Currency Amount" := (amt / 55.889) * exchrate."Exchange Rate Amount";
+                        gle.UpdateDebitCredit(false);
+                        gle.Modify();
+                    until gle.Next() = 0;
 
 
-                    bankle.Modify();
-                end;
+                bankle.Modify();
+            //end;
             until bankle.Next() = 0;
+        Message(format(cc));
+    end;
+
+    procedure fixentries3()
+    var
+
+        cc: Integer;
+        sinv: record "Sales Invoice Header";
+        scrm: record "Sales Cr.Memo Header";
+
+        exchrate: record "Currency Exchange Rate";
+        amt: decimal;
+    begin
+        cc := 0;
+        sinv.SetRange("Posting Date", DMY2Date(12, 03, 2024));
+        sinv.SetRange("Currency Code", 'USD');
+        if sinv.FindFirst() then
+            repeat
+
+                //if bankle.Amount <> bankle."Amount (LCY)" then begin
+                cc += 1;
+
+                sinv."Currency Factor" := 1;
+
+
+                sinv.Modify();
+            until sinv.Next() = 0;
+        Message(format(cc));
+        cc := 0;
+        scrm.SetRange("Posting Date", DMY2Date(12, 03, 2024));
+        scrm.SetRange("Currency Code", 'USD');
+        if scrm.FindFirst() then
+            repeat
+
+                //if bankle.Amount <> bankle."Amount (LCY)" then begin
+                cc += 1;
+
+                scrm."Currency Factor" := 1;
+
+
+                scrm.Modify();
+            until scrm.Next() = 0;
+        Message(format(cc));
+
+
+
+
+
         Message(format(cc));
     end;
 
@@ -939,9 +993,301 @@ codeunit 61501 FBM_Fixes
 
         until comp.Next() = 0;
         cos.Reset();
-        cos.setfilter("Site Loc Code", '%1|%2|%3', 'SITE1222', 'SITE1223', 'SITE1224');
-        COS.DeleteAll();
+
         message('done');
 
+    end;
+
+    procedure fixstatusfbm()
+    var
+        csite: record FBM_CustomerSite_C;
+        cust: record customer;
+    begin
+
+        csite.FindFirst();
+        repeat
+            csite.CalcFields("Country/Region Code_FF");
+            cust.get(csite."Customer No.");
+            if (cust."Country/Region Code" = 'PH') or (csite."Country/Region Code_FF" = 'PH') then begin
+
+                csite.Validate(Status, csite.Status::"STOP OPERATION");
+                csite.Modify();
+            end;
+        until csite.Next() = 0;
+    end;
+
+    procedure fixexch1D()
+    var
+        cexch: record "Currency Exchange Rate";
+        cexch2: record "Currency Exchange Rate";
+
+    begin
+
+
+        cexch.SetRange("Starting Date", DMY2Date(07, 03, 2024));
+        cexch2.SetRange("Starting Date", DMY2Date(08, 03, 2024));
+
+        if cexch.FindFirst() then
+            repeat
+                cexch2.SetRange("Currency Code", cexch."Currency Code");
+                if cexch2.FindFirst() then begin
+
+
+
+                    cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
+                    cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
+                    cexch2."Relational Currency Code" := cexch."Relational Currency Code";
+                    cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
+                    cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
+                    cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
+                    cexch2.Modify();
+                end;
+
+            until cexch.Next() = 0;
+        message('Done 08/3');
+    end;
+
+    procedure fixexchday()
+    var
+        cexch: record "Currency Exchange Rate";
+        cexch2: record "Currency Exchange Rate";
+        comp: record Company;
+        cinfo: record "company Information";
+    begin
+        comp.findfirst;
+        repeat
+
+            cinfo.changecompany(comp.name);
+            cinfo.get();
+            cexch.changecompany(comp.name);
+            cexch2.changecompany(comp.name);
+            cexch.SetRange("Starting Date", DMY2Date(20, 04, 2024));
+            cexch2.SetRange("Starting Date", DMY2Date(22, 04, 2024));
+
+            if cexch.FindFirst() then
+                repeat
+                    cexch2.SetRange("Currency Code", cexch."Currency Code");
+                    if not cexch2.FindFirst() then begin
+                        cexch2.init;
+                        cexch2."Starting Date" := DMY2Date(22, 04, 2024);
+                        cexch2."Currency Code" := cexch."Currency Code";
+                        cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
+                        cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
+                        cexch2."Relational Currency Code" := cexch."Relational Currency Code";
+                        cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
+                        cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
+                        cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
+                        cexch2.Insert();
+                    end;
+
+                until cexch.Next() = 0;
+            message('Done 22/4');
+            // cexch.Reset();
+            // cexch2.Reset();
+            // cexch.SetRange("Starting Date", DMY2Date(15, 03, 2024));
+            // cexch2.SetRange("Starting Date", DMY2Date(17, 03, 2024));
+
+            // if cexch.FindFirst() then
+            //     repeat
+            //         cexch2.SetRange("Currency Code", cexch."Currency Code");
+            //         if not cexch2.FindFirst() then begin
+            //             cexch2.init;
+            //             cexch2."Starting Date" := DMY2Date(17, 03, 2024);
+            //             cexch2."Currency Code" := cexch."Currency Code";
+            //             cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
+            //             cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
+            //             cexch2."Relational Currency Code" := cexch."Relational Currency Code";
+            //             cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
+            //             cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
+            //             cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
+            //             cexch2.Insert();
+            //         end;
+
+            //     until cexch.Next() = 0;
+            // message('Done 9/3');
+            // cexch.Reset();
+            // cexch2.Reset();
+            // cexch.SetRange("Starting Date", DMY2Date(07, 03, 2024));
+            // cexch2.SetRange("Starting Date", DMY2Date(10, 03, 2024));
+
+            // if cexch.FindFirst() then
+            //     repeat
+            //         cexch2.SetRange("Currency Code", cexch."Currency Code");
+            //         if not cexch2.FindFirst() then begin
+            //             cexch2.init;
+            //             cexch2."Starting Date" := DMY2Date(10, 03, 2024);
+            //             cexch2."Currency Code" := cexch."Currency Code";
+            //             cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
+            //             cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
+            //             cexch2."Relational Currency Code" := cexch."Relational Currency Code";
+            //             cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
+            //             cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
+            //             cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
+            //             cexch2.Insert();
+            //         end;
+
+
+            //     until cexch.Next() = 0;
+            message('Done ' + cinfo."Custom System Indicator Text")
+        until comp.next = 0;
+    end;
+
+    procedure fixcos()
+    var
+        cos: record FBM_CustOpSite;
+        csite: record FBM_CustomerSite_C;
+        cinfo: record "Company Information";
+        country: record "Country/Region";
+        customer: record Customer;
+        site: record FBM_Site;
+    begin
+        cinfo.get;
+        cos.SetFilter(Subsidiary, cinfo.FBM_FALessee + '*');
+        cos.DeleteAll();
+        csite.FindFirst();
+        repeat
+            cos.init;
+            if customer.get(csite."Customer No.") then begin
+                cos."Customer No." := customer.FBM_GrCode;
+                cos."Operator No." := customer.FBM_GrCode;
+                cos."Cust Loc Code" := csite."Customer No.";
+                cos."Op Loc Code" := csite."Customer No.";
+                cos."Site Loc Code" := csite."Site Code";
+                cos."Site Code" := csite.SiteGrCode;
+                if (csite.Status = csite.Status::"HOLD OPERATION") or (csite.Status = csite.Status::OPERATIONAL) then
+                    cos.IsActive := true
+                else
+                    cos.IsActive := false;
+                cos.Status := csite.Status;
+                site.setrange("Site Code", csite.SiteGrCode);
+                site.SetRange(ActiveRec, true);
+                if site.FindFirst() then begin
+                    cos."Valid From" := site."Valid From";
+                    cos."Valid To" := site."Valid To";
+                    cos."Record Owner" := site."Record Owner";
+                    cos."Change Note" := site."Change Note";
+                end;
+                if country.get(customer."Country/Region Code") then
+                    cos.Subsidiary := cinfo.FBM_FALessee + ' ' + country.FBM_Country3
+                else
+                    cos.Subsidiary := cinfo.FBM_FALessee;
+                cos.Insert();
+            end;
+
+
+        until csite.Next() = 0;
+    end;
+
+    procedure dataupgrade()
+    var
+        finattrib: record FBM_FinAttributes;
+        custLE: record "Cust. Ledger Entry";
+        detcustLE: record "Detailed Cust. Ledg. Entry";
+        genjnlline: record "Gen. Journal Line";
+        glentry: record "G/L Entry";
+        sh: record "Sales Header";
+        sih: record "Sales Invoice Header";
+        sch: record "Sales Cr.Memo Header";
+        comp: record Company;
+
+    begin
+        if comp.FindFirst() then
+            repeat
+                finattrib.ChangeCompany(comp.name);
+                if finattrib.FindFirst() then
+                    repeat
+                        finattrib.FBM_Segment2 := enum::FBM_Segment_DD.FromInteger(finattrib.Segment);
+                        if finattrib.segment <> finattrib.Segment::" " then
+                            finattrib.Modify();
+                    until finattrib.Next() = 0;
+                custLE.ChangeCompany(comp.name);
+                if custLE.FindFirst() then
+                    repeat
+                        custLE.FBM_Segment2 := enum::FBM_Segment_DD.FromInteger(custLE.FBM_Segment);
+                        if sih.get(custle."Document No.") or sch.get(custle."Document No.") then
+                            if custle.FBM_Segment <> custLE.FBM_Segment::" " then
+                                custLE.Modify();
+                    until custLE.Next() = 0;
+                detcustLE.ChangeCompany(comp.name);
+                if detcustLE.FindFirst() then
+                    repeat
+                        detcustLE.FBM_Segment2 := enum::FBM_Segment_DD.FromInteger(detcustLE.FBM_Segment);
+                        if sih.get(detcustle."Document No.") or sch.get(detcustle."Document No.") then
+                            if detcustle.FBM_Segment <> detcustLE.FBM_Segment::" " then
+                                detcustLE.Modify();
+                    until detcustLE.Next() = 0;
+                genjnlline.ChangeCompany(comp.name);
+                if genjnlline.FindFirst() then
+                    repeat
+                        genjnlline.FBM_Segment2 := enum::FBM_Segment_DD.FromInteger(genjnlline.FBM_Segment);
+                        if genjnlline.FBM_Segment <> genjnlline.FBM_Segment::" " then
+                            genjnlline.Modify();
+                    until genjnlline.Next() = 0;
+                glentry.ChangeCompany(comp.name);
+                if glentry.FindFirst() then
+                    repeat
+                        glentry.FBM_Segment2 := enum::FBM_Segment_DD.FromInteger(glentry.FBM_Segment);
+                        if glentry.FBM_Segment <> glentry.FBM_Segment::" " then
+                            glentry.Modify();
+                    until glentry.Next() = 0;
+                sh.ChangeCompany(comp.name);
+                if sh.FindFirst() then
+                    repeat
+                        sh.FBM_Segment2 := enum::FBM_Segment_DD.FromInteger(sh.FBM_Segment);
+                        if sh.FBM_Segment <> sh.FBM_Segment::" " then
+                            sh.Modify();
+                    until sh.Next() = 0;
+                sih.ChangeCompany(comp.name);
+                if sih.FindFirst() then
+                    repeat
+                        sih.FBM_Segment2 := enum::FBM_Segment_DD.FromInteger(sih.FBM_Segment);
+                        if sih.FBM_Segment <> sih.FBM_Segment::" " then
+                            sih.Modify();
+                    until sih.Next() = 0;
+                sch.ChangeCompany(comp.name);
+                if sch.FindFirst() then
+                    repeat
+                        sch.FBM_Segment2 := enum::FBM_Segment_DD.FromInteger(sch.FBM_Segment);
+                        if sch.FBM_Segment <> sch.FBM_Segment::" " then
+                            sch.Modify();
+                    until sch.Next() = 0;
+            until comp.next = 0;
+        Message('Done');
+    end;
+
+    procedure fixline()
+    var
+        pline: record "Purchase Line";
+    begin
+        pline.setrange("Document No.", '005719');
+        pline.SetRange("Line No.", 10000);
+        if pline.FindFirst() then begin
+            pline.validate("Qty. Invoiced (Base)", 0);
+            pline.validate("Quantity Invoiced", 0);
+            pline.Modify();
+        end;
+    end;
+
+    procedure fixdimtr8()
+    var
+        pinvheader: record "Purch. Inv. Header";
+    begin
+        pinvheader.SetRange("No.", 'PPI101265');
+        if pinvheader.FindFirst() then begin
+            pinvheader."Dimension Set ID" := 8301;
+            pinvheader.Modify();
+        end;
+
+    end;
+
+    procedure fixfadisp(pfa: code[20])
+    var
+        dpb: record "FA Depreciation Book";
+    begin
+        dpb.SetRange("FA No.", pfa);
+        if dpb.FindFirst() then begin
+            dpb."Disposal Date" := 0D;
+            dpb.Modify();
+        end;
     end;
 }

@@ -187,6 +187,54 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 end;
 
             }
+            action("exchrate day")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixexchday();
+
+
+
+
+                end;
+
+            }
+            action("fixcos")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixcos();
+
+
+
+
+                end;
+
+            }
+            action("exchrate1D")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixexch1D();
+
+
+
+
+                end;
+
+            }
             action("currvendor")
             {
                 ApplicationArea = all;
@@ -213,7 +261,7 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 end;
 
             }
-            action("fixentries2")
+            action("fixentries3")
             {
                 ApplicationArea = all;
                 trigger
@@ -221,7 +269,7 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 var
                     fix: Codeunit FBM_Fixes;
                 begin
-                    fix.fixentries2();
+                    fix.fixentries3();
 
                 end;
 
@@ -234,13 +282,66 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 var
                     fix: Codeunit FBM_Fixes;
                 begin
-                    fix.fixactive();
+                    fix.fixstatusfbm();
 
 
                 end;
 
             }
+            action("dataupgrade")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.dataupgrade();
 
+                end;
+
+            }
+
+            action("fixline80")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixline();
+
+                end;
+
+            }
+            action("fixdimtr8")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixdimtr8();
+
+                end;
+
+            }
+            action("fizFAdisp")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixfadisp('FA00027');
+                    ;
+
+                end;
+
+            }
 
 
         }

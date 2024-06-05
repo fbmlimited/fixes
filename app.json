@@ -2,7 +2,7 @@
   "id": "16b04d7c-c356-4c45-a421-c28ce224ed74",
   "name": "fixes",
   "publisher": "FBM Group",
-  "version": "1.0.0.1",
+  "version": "1.0.0.2",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -15,7 +15,7 @@
       "id": "9d836a4f-3b97-4179-ae7d-608f099ba7f3",
       "name": "FBM Data Dictionary",
       "publisher": "FBM Group",
-      "version": "1.0.0.4"
+      "version": "1.0.0.142"
     }
   ],
   "screenshots": [],
