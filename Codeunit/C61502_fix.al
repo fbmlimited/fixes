@@ -1,6 +1,47 @@
 codeunit 61501 FBM_Fixes
 {
-    Permissions = tabledata "FA Depreciation Book" = rimd, tabledata "Sales Cr.Memo Header" = rimd, tabledata "Value Entry" = rimd, tabledata "VAT Entry" = rimd, tabledata "Detailed Cust. Ledg. Entry" = rimd, tabledata "Bank Account Ledger Entry" = rimd, tabledata "Purch. Inv. Line" = rimd, tabledata "G/L Entry" = rimd, tabledata "Sales Invoice Header" = rimd, tabledata "Purch. Cr. Memo Hdr." = RIMD, tabledata "Purch. Inv. Header" = RIMD, tabledata "G/L Account" = rimd, tabledata "Vendor Ledger Entry" = rimd;
+    Permissions = tabledata "Access Control" = rimd,
+    tabledata "FA Depreciation Book" = rimd,
+    tabledata "Sales Cr.Memo Header" = rimd,
+    tabledata "Value Entry" = rimd,
+    tabledata "VAT Entry" = rimd,
+    tabledata "Detailed Cust. Ledg. Entry" = rimd,
+    tabledata "Bank Account Ledger Entry" = rimd,
+    tabledata "Purch. Inv. Line" = rimd,
+    tabledata "G/L Entry" = rimd,
+    tabledata "Sales Invoice Header" = rimd,
+    tabledata "Sales Invoice Line" = rimd,
+    tabledata "Purch. Cr. Memo Hdr." = RIMD,
+    tabledata "Purch. Inv. Header" = RIMD,
+    tabledata "G/L Account" = rimd,
+    tabledata "Vendor Ledger Entry" = rimd,
+    tabledata "Item Ledger Entry" = rimd,
+    tabledata "Reservation Entry" = rimd,
+    tabledata "Warehouse Entry" = rimd,
+    tabledata "Purch. Cr. Memo Line" = rimd,
+    tabledata "G/L Entry - VAT Entry Link" = rimd,
+    tabledata "Purchase Header" = rimd,
+    tabledata "Purchase Line" = rimd,
+    tabledata "Purch. Rcpt. Header" = rimd,
+    tabledata "Purch. Rcpt. Line" = rimd,
+    tabledata "G/L Register" = rimd,
+    tabledata Location = rimd,
+    tabledata bin = rimd,
+    tabledata "Bin Content" = rimd,
+    tabledata "Detailed Vendor Ledg. Entry" = rimd,
+    tabledata "Invt. Receipt Header" = rimd,
+    tabledata "Invt. Receipt Line" = rimd,
+    tabledata "Invt. Shipment Header" = rimd,
+    tabledata "Invt. Shipment Line" = rimd,
+    tabledata "G/L - Item Ledger Relation" = rimd,
+    tabledata "Item Application Entry" = rimd,
+    tabledata "Integration Synch. Job" = rimd,
+    tabledata "Integration Synch. Job Errors" = rimd,
+    tabledata "Avg. Cost Adjmt. Entry Point" = rimd,
+    tabledata "Job Queue Log Entry" = rimd,
+    tabledata "Warehouse Employee" = rimd,
+    tabledata "Direct Trans. Header" = rimd,
+    tabledata "Direct Trans. Line" = rimd;
 
 
 
@@ -290,6 +331,57 @@ codeunit 61501 FBM_Fixes
             until glentry.Next() = 0;
         message(format(crec));
     end;
+
+    procedure fixacyrate()
+    var
+        glentry: record "G/L Entry";
+        exchrate: record "Currency Exchange Rate";
+        crec: integer;
+    begin
+        //exchrate.ChangeCompany('NTT Ltd Branch');
+        glentry.SetFilter("Posting Date", '>=%1 & <=%2', DMY2Date(01, 09, 2024), DMY2Date(30, 09, 2024));
+        //GLENTRY.SetFilter("G/L Account No.", '<>%1 & <>%2 ', '668400', '768400');
+        if glentry.FindFirst() then
+            repeat
+                // if glentry.amount <> 0 then
+                // if ((glentry."Additional-Currency Amount" / glentry.Amount) > 0.98) and
+                //  ((glentry."Additional-Currency Amount" / glentry.Amount) < 1.02) then begin
+                //if abs(glentry.Amount) > 1 then begin
+                crec += 1;
+                exchrate.get('USD', glentry."Posting Date");
+                glentry.validate("Additional-Currency Amount", glentry.Amount / exchrate."Relational Exch. Rate Amount");
+                glentry.Modify();
+            //end;
+            // end;
+            until glentry.Next() = 0;
+        message(format(crec));
+    end;
+
+    procedure fixacyrateC()
+    var
+        glentry: record "G/L Entry";
+        exchrate: record "Currency Exchange Rate";
+        crec: integer;
+    begin
+        //exchrate.ChangeCompany('NTT Ltd Branch');
+        glentry.SetFilter("Posting Date", '>=%1 & <=%2', DMY2Date(24, 08, 2024), DMY2Date(31, 08, 2024));
+        //GLENTRY.SetFilter("G/L Account No.", '<>%1 & <>%2 ', '668400', '768400');
+        if glentry.FindFirst() then
+            repeat
+                // if glentry.amount <> 0 then
+                // if ((glentry."Additional-Currency Amount" / glentry.Amount) > 0.98) and
+                //  ((glentry."Additional-Currency Amount" / glentry.Amount) < 1.02) then begin
+                //if abs(glentry.Amount) > 1 then begin
+                crec += 1;
+                exchrate.get('USD', glentry."Posting Date");
+                glentry.validate("Additional-Currency Amount", glentry.Amount * exchrate."Exchange Rate Amount");
+                glentry.Modify();
+            //end;
+            // end;
+            until glentry.Next() = 0;
+        message(format(crec));
+    end;
+
 
     procedure fixacy2()
     var
@@ -1024,8 +1116,8 @@ codeunit 61501 FBM_Fixes
     begin
 
 
-        cexch.SetRange("Starting Date", DMY2Date(07, 03, 2024));
-        cexch2.SetRange("Starting Date", DMY2Date(08, 03, 2024));
+        cexch.SetRange("Starting Date", DMY2Date(27, 09, 2024));
+        cexch2.SetRange("Starting Date", DMY2Date(28, 09, 2024));
 
         if cexch.FindFirst() then
             repeat
@@ -1041,10 +1133,54 @@ codeunit 61501 FBM_Fixes
                     cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
                     cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
                     cexch2.Modify();
+                end
+                else begin
+                    cexch2.Init();
+                    cexch2."Starting Date" := DMY2Date(28, 09, 2024);
+                    cexch2."Currency Code" := cexch."Currency Code";
+                    cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
+                    cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
+                    cexch2."Relational Currency Code" := cexch."Relational Currency Code";
+                    cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
+                    cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
+                    cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
+                    cexch2.Insert();
                 end;
 
             until cexch.Next() = 0;
-        message('Done 08/3');
+        message('Done 28/9');
+        cexch.SetRange("Starting Date", DMY2Date(27, 09, 2024));
+        cexch2.SetRange("Starting Date", DMY2Date(29, 09, 2024));
+
+        if cexch.FindFirst() then
+            repeat
+                cexch2.SetRange("Currency Code", cexch."Currency Code");
+                if cexch2.FindFirst() then begin
+
+
+
+                    cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
+                    cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
+                    cexch2."Relational Currency Code" := cexch."Relational Currency Code";
+                    cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
+                    cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
+                    cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
+                    cexch2.Modify();
+                end else begin
+                    cexch2.Init();
+                    cexch2."Starting Date" := DMY2Date(29, 09, 2024);
+                    cexch2."Currency Code" := cexch."Currency Code";
+                    cexch2."Exchange Rate Amount" := cexch."Exchange Rate Amount";
+                    cexch2."Adjustment Exch. Rate Amount" := cexch."Adjustment Exch. Rate Amount";
+                    cexch2."Relational Currency Code" := cexch."Relational Currency Code";
+                    cexch2."Relational Exch. Rate Amount" := cexch."Relational Exch. Rate Amount";
+                    cexch2."Relational Adjmt Exch Rate Amt" := cexch."Relational Adjmt Exch Rate Amt";
+                    cexch2."Fix Exchange Rate Amount" := cexch."Fix Exchange Rate Amount";
+                    cexch2.Insert();
+                end;
+
+            until cexch.Next() = 0;
+        message('Done 29/9');
     end;
 
     procedure fixexchday()
@@ -1290,4 +1426,394 @@ codeunit 61501 FBM_Fixes
             dpb.Modify();
         end;
     end;
+
+    procedure acccontr()
+    var
+        acc: record "Tenant Media";
+    begin
+        //acc.SetRange("Company Name", 'FBM SYSTEMS AND ELECTRONICS');
+        acc.DeleteAll();
+    end;
+
+
+    procedure fixmx(numdoc: code[20]; amount: Decimal)
+    var
+        sinv: record "Sales Invoice Header";
+    begin
+        if sinv.get(numdoc) then begin
+            sinv.FBM_Currency2 := 'MXN';
+            sinv.FBM_LocalCurrAmt := amount;
+            sinv.Modify();
+            message('done');
+        end;
+    end;
+
+    procedure fixprepay()
+    var
+        pinv: record "Purch. Inv. Header";
+    begin
+        if pinv.get('PPI102136') then begin
+            pinv."Prepayment Invoice" := false;
+            pinv.Modify();
+        end;
+    end;
+
+    procedure fixpoeps()
+    var
+        ph: record "Purchase Header";
+        pl: record "Purchase Line";
+    begin
+        pl.SetRange("Document Type", ph."Document Type"::Order);
+        pl.SetRange("Document No.", 'PO100202');
+        pl.ModifyAll("Prepayment %", 0);
+        pl.ModifyAll("Prepayment Amount", 0);
+        pl.ModifyAll("Prepmt. Line Amount", 0);
+        pl.ModifyAll("Prepmt. Amt. Inv.", 0);
+        ph.SetRange("Document Type", ph."Document Type"::Order);
+        ph.SetRange("No.", 'PO100202');
+        if ph.FindFirst() then begin
+            ph."Prepayment %" := 0;
+            ph.Modify();
+        end;
+    end;
+
+    procedure fixinvfbm(numdoc: code[20]; importe: decimal)
+    var
+        sinv: record "Sales Invoice Header";
+    begin
+        if sinv.get(numdoc) then
+            if sinv.FBM_LocalCurrAmt = 0 then begin
+
+                sinv.FBM_Currency2 := 'MXN';
+                sinv.FBM_LocalCurrAmt := importe;
+                sinv.Modify();
+            end;
+    end;
+
+    procedure csiteact()
+    var
+        comp: record Company;
+        csite: record FBM_CustomerSite_C;
+    begin
+        comp.FindFirst();
+
+        repeat
+            csite.ChangeCompany(comp.Name);
+            if csite.FindFirst() then
+                repeat
+                    csite.Rename(csite."Customer No.", csite."Site Code", csite.Version, true);
+                //    csite.ActiveRec := true;
+                //      csite.Modify();
+                until csite.next = 0;
+        until comp.Next() = 0;
+
+    end;
+
+    procedure createcos()
+    var
+        csite: record FBM_CustomerSite_C;
+        CompanyInfo: record "Company Information";
+        customer: record Customer;
+        country: record "Country/Region";
+        cos: record FBM_CustOpSite;
+
+
+    begin
+        CompanyInfo.get;
+        if country.get(CompanyInfo."Country/Region Code") then
+            COS.SetRange(Subsidiary, CompanyInfo.FBM_FALessee + ' ' + country.FBM_Country3);
+        cos.DeleteAll();
+        if csite.FindFirst() then
+            repeat
+                if csite.ActiveRec then
+                    if CompanyInfo.FBM_CustIsOp then begin
+                        customer.get(CSite."Customer No.");
+                        if country.get(customer."Country/Region Code") then
+                            COS.SetRange(Subsidiary, CompanyInfo.FBM_FALessee + ' ' + country.FBM_Country3);
+                        cos.SetRange("Customer No.", customer.FBM_GrCode);
+                        cos.SetRange("Site Code", '');
+                        if cos.findfirst then cos.DeleteAll();
+                        cos.Reset();
+
+                        customer.get(CSite."Customer No.");
+                        if country.get(customer."Country/Region Code") then
+                            COS.SetRange(Subsidiary, CompanyInfo.FBM_FALessee + ' ' + country.FBM_Country3);
+                        cos.SetRange("Customer No.", customer.FBM_GrCode);
+                        cos.SetRange("Operator No.", customer.FBM_GrCode);
+                        cos.SetRange("Site Code", CSite.SiteGrCode);
+                        // if (CustSite.Status = CustSite.Status::OPERATIONAL) or (CustSite.Status = CustSite.Status::"HOLD OPERATION") then
+                        //     cos.SetRange(ActiveRec, true)
+                        // else
+                        //     cos.SetRange(ActiveRec, false);
+                        //cos.SetRange(Status, xrec.Status);
+                        if not cos.FindFirst() then begin
+                            COS.Init();
+                            COS."Customer No." := customer.FBM_GrCode;
+                            COS."Operator No." := customer.FBM_GrCode;
+                            COS."Site Code" := CSite.SiteGrCode;
+                            cos."Cust Loc Code" := customer."No.";
+                            cos.IsActive := true;
+                            if (CSite.Status = CSite.Status::OPERATIONAL) or (CSite.Status = CSite.Status::"HOLD OPERATION") then
+                                cos.IsActive := true
+                            else
+                                cos.IsActive := false;
+                            cos."Op Loc Code" := customer."No.";
+                            cos."Record Owner" := UserId;
+                            cos."Site Loc Code" := CSite."Site Code";
+                            cos.Status := csite.Status;
+                            cos."Valid From" := Today;
+                            cos."Valid To" := DMY2Date(31, 12, 2999);
+                            CompanyInfo.testfield(FBM_FALessee);
+                            // if country.get(customer."Country/Region Code") then begin
+
+                            //     country.testfield(FBM_Country3);
+                            cos.Subsidiary := CompanyInfo.FBM_FALessee + ' ' + country.FBM_Country3;
+
+                            // end;
+                            COS.Insert();
+
+                        end
+
+                    end;
+            until csite.next = 0;
+    end;
+
+    procedure cleanmex()
+    var
+        ile: record "Item Ledger Entry";
+        resentry: record "Reservation Entry";
+        wentry: record "Warehouse Entry";
+        pinvh: record "Purch. Inv. Header";
+        pinvl: record "Purch. Inv. Line";
+        pcrmh: record "Purch. Cr. Memo Hdr.";
+        pcrml: record "Purch. Cr. Memo Line";
+        ph: record "Purchase Header";
+        pl: record "Purchase Line";
+        prech: record "Purch. Rcpt. Header";
+        precl: record "Purch. Rcpt. Line";
+        gle: record "G/L Entry";
+        vate: record "VAT Entry";
+        glvat: record "G/L Entry - VAT Entry Link";
+        glreg: record "G/L Register";
+        item: record Item;
+        loc: record Location;
+        bin: record Bin;
+        binc: record "Bin Content";
+        vle: record "Vendor Ledger Entry";
+        dvle: record "Detailed Vendor Ledg. Entry";
+        rech: record "Invt. Receipt Header";
+        recl: record "Invt. Receipt Line";
+        shph: record "Invt. Shipment Header";
+        shpl: record "Invt. Shipment Line";
+        ve: record "Value Entry";
+
+        GLI: Record "G/L - Item Ledger Relation";
+        ita: record "Item Application Entry";
+        isy: record "Integration Synch. Job Errors";
+        isj: record "Integration Synch. Job";
+        costa: record "Avg. Cost Adjmt. Entry Point";
+        jqle: record "Job Queue Log Entry";
+        usloc: record "Warehouse Employee";
+
+
+    begin
+        ile.DeleteAll();
+        resentry.DeleteAll();
+        wentry.DeleteAll();
+        pinvl.DeleteAll();
+        pinvh.DeleteAll();
+        pcrml.DeleteAll();
+        pcrmh.DeleteAll();
+        pl.DeleteAll();
+        ph.DeleteAll();
+        precl.DeleteAll();
+        prech.DeleteAll();
+        gle.DeleteAll();
+        vate.DeleteAll();
+        glvat.DeleteAll();
+        glreg.DeleteAll();
+        item.DeleteAll();
+        loc.DeleteAll();
+        bin.DeleteAll();
+        binc.DeleteAll();
+        vle.DeleteAll();
+        dvle.DeleteAll();
+        recl.DeleteAll();
+        rech.DeleteAll();
+        shpl.DeleteAll();
+        shph.DeleteAll();
+        ve.DeleteAll();
+        gli.DeleteAll();
+        ita.DeleteAll();
+        isj.DeleteAll();
+        isy.DeleteAll();
+        costa.DeleteAll();
+        jqle.DeleteAll();
+        usloc.DeleteAll();
+        message('done');
+
+
+
+
+    end;
+
+    procedure cleanmex2()
+    var
+        actc: record "Activities Cue";
+        ijl: record "Item Journal Line";
+        it: record Item;
+        assl: record "Assembly Line";
+        assh: record "Assembly Header";
+        fa: record "Fixed Asset";
+        ptrh: record "Direct Trans. Header";
+        ptrl: record "Direct Trans. Line";
+    begin
+
+        ptrl.DeleteAll();
+        ptrh.DeleteAll();
+
+    end;
+
+    procedure fixmex()
+    var
+        sinv: record "Sales Invoice Header";
+        sinvl: record "Sales Invoice Line";
+        cle: record "Cust. Ledger Entry";
+        dcle: record "Detailed Cust. Ledg. Entry";
+        vate: record "VAT Entry";
+        gle: record "G/L Entry";
+        ve: record "Value Entry";
+    begin
+        sinv.SetRange("No.", '2024-1295');
+        if sinv.FindFirst() then begin
+            sinv.validate("Bill-to Customer No.", 'MX0067');
+            sinv.Validate("Sell-to Customer No.", 'MX0067');
+            sinv.validate(FBM_Site, 'MX0067-0003');
+
+            sinv.Modify();
+        end;
+
+        sinvl.SetRange("Document No.", '2024-1295');
+        if sinvl.FindFirst() then
+            repeat
+                sinvl.Validate("Bill-to Customer No.", 'MX0067');
+                sinvl.Validate("Sell-to Customer No.", 'MX0067');
+                sinvl.Validate(FBM_Site, 'MX0067-0003');
+                sinvl.Modify();
+            until sinvl.Next() = 0;
+
+        cle.SetRange("Document No.", '2024-1295');
+        if cle.FindFirst() then
+            repeat
+                cle.Validate("Customer No.", 'MX0067');
+                cle.Validate(FBM_Site, 'MX0067-0003');
+                cle.Modify();
+            until cle.next() = 0;
+
+        dcle.SetRange("Document No.", '2024-1295');
+        if dcle.FindFirst() then
+            repeat
+                dcle.Validate("Customer No.", 'MX0067');
+                dcle.Validate(FBM_Site, 'MX0067-0003');
+                dcle.Modify();
+            until dcle.next() = 0;
+
+        vate.SetRange("Document No.", '2024-1295');
+        if vate.FindFirst() then
+            repeat
+                vate.Validate("Bill-to/Pay-to No.", 'MX0067');
+                vate.Modify();
+            until vate.next() = 0;
+        gle.SetRange("Document No.", '2024-1295');
+        if gle.FindFirst() then
+            repeat
+                gle.Validate("Source No.", 'MX0067');
+                gle.Validate(FBM_Site, 'MX0067-0003');
+                gle.Modify();
+            until gle.next() = 0;
+        ve.SetRange("Document No.", '2024-1295');
+        if ve.FindFirst() then
+            repeat
+                ve.Validate("Source No.", 'MX0067');
+                ve.Modify();
+            until ve.next() = 0;
+
+    end;
+
+    procedure setcompany()
+    var
+        comp: record Company;
+        cinfo: record "Company Information";
+        masterc: record FBM_Customer;
+        masters: record FBM_Site;
+        cust: record Customer;
+        csite: record FBM_CustomerSite_C;
+    begin
+        comp.FindFirst();
+        masterc.FindFirst();
+        masterc.ModifyAll(FBM_Company1, '');
+        masterc.ModifyAll(FBM_Company2, '');
+        masterc.ModifyAll(FBM_Company3, '');
+        masters.ModifyAll(Company1, '');
+        masters.ModifyAll(Company2, '');
+        masters.ModifyAll(Company3, '');
+        repeat
+            cinfo.ChangeCompany(comp.name);
+            cust.ChangeCompany(comp.name);
+            csite.ChangeCompany(comp.Name);
+            cinfo.get();
+
+            masterc.FindFirst();
+            repeat
+
+                cust.setrange(FBM_GrCode, masterc."No.");
+                if not cust.IsEmpty then begin
+                    if (masterc.FBM_Company1 <> cinfo."Custom System Indicator Text") and
+                    (masterc.FBM_Company2 <> cinfo."Custom System Indicator Text") and
+                    (masterc.FBM_Company3 <> cinfo."Custom System Indicator Text") and
+                    not ((masterc."Country/Region Code" = 'PH') and (cinfo."Custom System Indicator Text" = 'FBM')) then begin
+                        if masterc.FBM_Company1 = '' then
+                            masterc.FBM_Company1 := cinfo."Custom System Indicator Text" else
+                            if masterc.FBM_Company2 = '' then
+                                masterc.FBM_Company2 := cinfo."Custom System Indicator Text" else
+                                if masterc.FBM_Company3 = '' then masterc.FBM_Company2 := cinfo."Custom System Indicator Text";
+                        masterc.Modify();
+
+                    end;
+
+                end;
+                if (masterc.FBM_Company1 = 'FBM') and (masterc."Country/Region Code" = 'MX') then begin
+                    masterc.FBM_Company2 := 'JYM';
+                    masterc.Modify();
+                end;
+            until masterc.Next() = 0;
+
+
+            masters.FindFirst();
+            repeat
+                csite.setrange(SiteGrCode, masters."Site Code");
+                if not csite.IsEmpty then begin
+                    if (masters.Company1 <> cinfo."Custom System Indicator Text") and
+                    (masters.Company2 <> cinfo."Custom System Indicator Text") and
+                    (masters.Company3 <> cinfo."Custom System Indicator Text") and
+                      not ((masters."Country/Region Code" = 'PH') and (cinfo."Custom System Indicator Text" = 'FBM')) then begin
+                        if masters.Company1 = '' then
+                            masters.Company1 := cinfo."Custom System Indicator Text" else
+                            if masters.Company2 = '' then
+                                masters.Company2 := cinfo."Custom System Indicator Text" else
+                                if masters.Company3 = '' then masters.Company2 := cinfo."Custom System Indicator Text";
+                        masters.Modify();
+
+                    end;
+
+                end;
+                if (masters.Company1 = 'FBM') and (masters."Country/Region Code" = 'MX') then begin
+                    masters.Company2 := 'JYM';
+                    masters.Modify();
+                end;
+            until masters.Next() = 0;
+
+        until comp.Next() = 0;
+    end;
+
 }

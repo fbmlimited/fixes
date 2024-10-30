@@ -342,6 +342,164 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 end;
 
             }
+            action("acc")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.acccontr();
+                    ;
+                    ;
+
+                end;
+
+            }
+            action("fixmx")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixmx('2430-0152', 1052.83);
+                    ;
+                    ;
+
+                end;
+
+            }
+            action("fixpp")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixprepay();
+                    Message('done');
+
+                end;
+
+            }
+            action("poeps")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixpoeps();
+                    Message('done');
+
+                end;
+
+            }
+            action("Acy")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixacyrate();
+                    Message('done');
+
+                end;
+
+            }
+            action(CustSite)
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.csiteact();
+                    Message('done');
+
+                end;
+
+            }
+
+            action("InvFBM")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixinvfbm('2430-0715', 33140.17);
+                    fix.fixinvfbm('2430-0716', 16629.97);
+                    Message('done');
+
+                end;
+
+            }
+            action("createcos")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.createcos();
+                    ;
+                    Message('done');
+
+                end;
+
+            }
+            action("cleanmex")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.cleanmex2();
+
+                end;
+
+            }
+            action("fixmex")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixmex();
+
+                end;
+
+            }
+            action("setcompany")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.setcompany();
+
+                end;
+
+            }
+
+
 
 
         }
