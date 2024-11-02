@@ -43,7 +43,16 @@ codeunit 61501 FBM_Fixes
     tabledata "Direct Trans. Header" = rimd,
     tabledata "Direct Trans. Line" = rimd;
 
+    var
+        Tempexcelbuffer: record "Excel Buffer" temporary;
+        FileManagement: Codeunit "File Management";
+        TempBlob: Codeunit "Temp Blob";
 
+        SheetName, ErrorMessage : Text;
+        FileInStream: InStream;
+        ImportFileLbl: Label 'Import file';
+        fa: record "Fixed Asset";
+        rn: Integer;
 
     procedure fixqty()
 
@@ -1816,4 +1825,82 @@ codeunit 61501 FBM_Fixes
         until comp.Next() = 0;
     end;
 
+    procedure fixier()
+    var
+        ier: record "Item Entry Relation";
+        ile: record "Item Ledger Entry";
+        dtl: record "Direct Trans. Line";
+        dth: record "Direct Trans. Header";
+
+    begin
+        ier.FindFirst();
+        repeat
+            if not ile.get(ier."Item Entry No.") then ier.delete;
+        until ier.Next() = 0;
+        dtl.DeleteAll();
+        dth.DeleteAll();
+        message('done');
+    end;
+
+    procedure dateacqfa()
+
+    begin
+        fa.FindFirst();
+        repeat
+            fa.Version += 1;
+            fa.Modify();
+        until fa.Next() = 0;
+        fa.Reset();
+        // FileManagement.BLOBImportWithFilter(TempBlob, ImportFileLbl, '', FileManagement.GetToFilterText('', '.xlsx'), 'xlsx');
+
+        // // Select sheet from the excel file
+        // TempBlob.CreateInStream(FileInStream);
+        // SheetName := TempExcelBuffer.SelectSheetsNameStream(FileInStream);
+
+        // // Open selected sheet
+        // TempBlob.CreateInStream(FileInStream);
+        // ErrorMessage := TempExcelBuffer.OpenBookStream(FileInStream, SheetName);
+        // if ErrorMessage <> '' then
+        //     Error(ErrorMessage);
+
+        // TempExcelBuffer.ReadSheet();
+        // rn := 3;
+        // if TempExcelBuffer.FindSet() then
+        //     repeat
+        //         rn += 1;
+        //         insertdata(rn);
+        //     until TempExcelBuffer.Next() < 1;
+    end;
+
+    procedure GetValueAtCell(RowNo: Integer; ColNo: Integer): Text
+
+    begin
+
+        if Tempexcelbuffer.get(RowNo, ColNo) then
+            exit(Tempexcelbuffer."Cell Value as Text");
+    end;
+
+    procedure insertdata(rowNo: Integer)
+    var
+        dtxt: Text;
+        no: code[20];
+        d: Integer;
+        m: Integer;
+        y: Integer;
+    begin
+
+        evaluate(no, GetValueAtCell(rowNo, 1));
+        fa.SetRange("No.", no);
+        if fa.FindFirst() then begin
+            dtxt := GetValueAtCell(rowNo, 2);
+            evaluate(d, copystr(dtxt, 1, 2));
+            evaluate(m, copystr(dtxt, 4, 2));
+            evaluate(y, '20' + copystr(dtxt, 7, 2));
+            fa.validate(FBM_AcquisitionDate, DMY2Date(d, m, y));
+            //ile.validate(FBM_Pedimentobis, GetValueAtCell(rowNo, 3));
+            fa.Modify();
+        end;
+        commit;
+
+    end;
 }

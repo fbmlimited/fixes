@@ -7,7 +7,7 @@
             "request": "launch",
             "server": "http://192.168.103.125",
             "serverInstance": "bc220",
-            "port": 7089,
+            "port": 7049,
             "authentication": "UserPassword",
             "startupObjectId": 22,
             "breakOnError": true,
