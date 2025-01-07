@@ -524,6 +524,67 @@ pageextension 51500 FBM_GLsetupExt_DF extends "General Ledger Setup"
                 end;
 
             }
+            action("cleanfamx")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.cleanFAMX();
+
+                end;
+
+            }
+            action("INCVER")
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.incver();
+
+                end;
+
+            }
+
+            action(carped)
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.CARGAPED();
+
+                end;
+
+            }
+            action(fixppi)
+            {
+                ApplicationArea = all;
+                trigger
+                OnAction()
+                var
+                    fix: Codeunit FBM_Fixes;
+                begin
+                    fix.fixppi(true, 'PPI101045');
+                    fix.fixppi(false, 'PPI101046');
+                    fix.fixppi(false, 'PPI101047');
+                    fix.fixppi(true, 'PPI101048');
+                    fix.fixppi(false, 'PPI101049');
+                    fix.fixppi(true, 'PPI101051');
+                    fix.fixppi(true, 'PPI101072');
+                    message('done');
+
+
+                end;
+
+            }
 
 
 

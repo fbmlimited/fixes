@@ -41,7 +41,8 @@ codeunit 61501 FBM_Fixes
     tabledata "Job Queue Log Entry" = rimd,
     tabledata "Warehouse Employee" = rimd,
     tabledata "Direct Trans. Header" = rimd,
-    tabledata "Direct Trans. Line" = rimd;
+    tabledata "Direct Trans. Line" = rimd,
+    tabledata "FA Ledger Entry" = rimd;
 
     var
         Tempexcelbuffer: record "Excel Buffer" temporary;
@@ -1845,31 +1846,34 @@ codeunit 61501 FBM_Fixes
     procedure dateacqfa()
 
     begin
+        //fa.SetRange("FA Subclass Code", 'EGM_MX');
         fa.FindFirst();
-        repeat
-            fa.Version += 1;
-            fa.Modify();
-        until fa.Next() = 0;
+        // repeat
+        //     FA.CalcFields(FBM_AcqCost);
+        //     FA.FBM_AcquisitionCost := FA.FBM_AcqCost;
+        //     fa.Version += 1;
+        //     fa.Modify();
+        // until fa.Next() = 0;
         fa.Reset();
-        // FileManagement.BLOBImportWithFilter(TempBlob, ImportFileLbl, '', FileManagement.GetToFilterText('', '.xlsx'), 'xlsx');
+        FileManagement.BLOBImportWithFilter(TempBlob, ImportFileLbl, '', FileManagement.GetToFilterText('', '.xlsx'), 'xlsx');
 
-        // // Select sheet from the excel file
-        // TempBlob.CreateInStream(FileInStream);
-        // SheetName := TempExcelBuffer.SelectSheetsNameStream(FileInStream);
+        // Select sheet from the excel file
+        TempBlob.CreateInStream(FileInStream);
+        SheetName := TempExcelBuffer.SelectSheetsNameStream(FileInStream);
 
-        // // Open selected sheet
-        // TempBlob.CreateInStream(FileInStream);
-        // ErrorMessage := TempExcelBuffer.OpenBookStream(FileInStream, SheetName);
-        // if ErrorMessage <> '' then
-        //     Error(ErrorMessage);
+        // Open selected sheet
+        TempBlob.CreateInStream(FileInStream);
+        ErrorMessage := TempExcelBuffer.OpenBookStream(FileInStream, SheetName);
+        if ErrorMessage <> '' then
+            Error(ErrorMessage);
 
-        // TempExcelBuffer.ReadSheet();
-        // rn := 3;
-        // if TempExcelBuffer.FindSet() then
-        //     repeat
-        //         rn += 1;
-        //         insertdata(rn);
-        //     until TempExcelBuffer.Next() < 1;
+        TempExcelBuffer.ReadSheet();
+        rn := 1;
+        if TempExcelBuffer.FindSet() then
+            repeat
+                rn += 1;
+                insertdatatot(rn);
+            until TempExcelBuffer.Next() < 1;
     end;
 
     procedure GetValueAtCell(RowNo: Integer; ColNo: Integer): Text
@@ -1893,14 +1897,261 @@ codeunit 61501 FBM_Fixes
         fa.SetRange("No.", no);
         if fa.FindFirst() then begin
             dtxt := GetValueAtCell(rowNo, 2);
-            evaluate(d, copystr(dtxt, 1, 2));
-            evaluate(m, copystr(dtxt, 4, 2));
-            evaluate(y, '20' + copystr(dtxt, 7, 2));
+            evaluate(d, copystr(dtxt, 9, 2));
+            evaluate(m, copystr(dtxt, 6, 2));
+            evaluate(y, '20' + copystr(dtxt, 3, 2));
             fa.validate(FBM_AcquisitionDate, DMY2Date(d, m, y));
             //ile.validate(FBM_Pedimentobis, GetValueAtCell(rowNo, 3));
             fa.Modify();
         end;
         commit;
 
+    end;
+
+    procedure insertdatatot(rowNo: Integer)
+    var
+        dtxt: Text;
+        no: code[20];
+        d: Integer;
+        m: Integer;
+        y: Integer;
+        vtxt: Text;
+        csite: record FBM_CustomerSite_C;
+    begin
+
+        evaluate(no, GetValueAtCell(rowNo, 3));
+        fa.SetRange("No.", no);
+        if fa.FindFirst() then begin
+            dtxt := GetValueAtCell(rowNo, 17);//acqdate
+            evaluate(d, copystr(dtxt, 1, 2));
+            evaluate(m, copystr(dtxt, 4, 2));
+            evaluate(y, '20' + copystr(dtxt, 9, 2));
+            fa.validate(FBM_AcquisitionDate, DMY2Date(d, m, y));
+            vtxt := GetValueAtCell(rowNo, 7);//brand
+            evaluate(fa.fbm_brand, vtxt);
+            vtxt := GetValueAtCell(rowNo, 8);//lessee
+            evaluate(fa.FBM_Lessee, vtxt);
+            vtxt := GetValueAtCell(rowNo, 9);//site
+            evaluate(fa.FBM_Site, vtxt);
+            csite.SetRange(SiteGrCode, vtxt);
+
+            vtxt := GetValueAtCell(rowNo, 15);//status
+            evaluate(fa.FBM_Status, vtxt);
+            vtxt := GetValueAtCell(rowNo, 18);//acq cost
+            evaluate(fa.FBM_AcquisitionCost, vtxt);
+            vtxt := GetValueAtCell(rowNo, 19);//model
+            evaluate(fa.FBM_Model, vtxt);
+            vtxt := GetValueAtCell(rowNo, 20);//segment
+            evaluate(fa.FBM_Segment2, vtxt);
+            dtxt := GetValueAtCell(rowNo, 21);//prep date
+            evaluate(d, copystr(dtxt, 1, 2));
+            evaluate(m, copystr(dtxt, 4, 2));
+            evaluate(y, '20' + copystr(dtxt, 9, 2));
+            fa.validate(FBM_DatePrepared, DMY2Date(d, m, y));
+            vtxt := GetValueAtCell(rowNo, 22);//fa location
+            evaluate(fa."FA Location Code", vtxt);
+            fa.Modify();
+        end;
+        commit;
+
+    end;
+
+    procedure cleanFAMX()
+    var
+        fa: record "Fixed Asset";
+    begin
+        fa.SetRange("FA Subclass Code", 'EGM_MX');
+        IF CONFIRM(FORMAT(FA.COUNT())) THEN
+            FA.DeleteAll();
+        MESSAGE('DONE');
+
+    end;
+
+    procedure incver()
+    var
+        fa: record "Fixed Asset";
+    begin
+        fa.SetRange("FA Subclass Code", 'EGM_MX');
+        IF FA.FindFirst() then BEGIN
+            FA.VERSION := 9;
+            FA.Modify();
+        END;
+    end;
+
+    procedure CARGAPED()
+
+    begin
+        //fa.SetRange("FA Subclass Code", 'EGM_MX');
+        fa.FindFirst();
+        // repeat
+        //     FA.CalcFields(FBM_AcqCost);
+        //     FA.FBM_AcquisitionCost := FA.FBM_AcqCost;
+        //     fa.Version += 1;
+        //     fa.Modify();
+        // until fa.Next() = 0;
+        fa.Reset();
+        FileManagement.BLOBImportWithFilter(TempBlob, ImportFileLbl, '', FileManagement.GetToFilterText('', '.xlsx'), 'xlsx');
+
+        // Select sheet from the excel file
+        TempBlob.CreateInStream(FileInStream);
+        SheetName := TempExcelBuffer.SelectSheetsNameStream(FileInStream);
+
+        // Open selected sheet
+        TempBlob.CreateInStream(FileInStream);
+        ErrorMessage := TempExcelBuffer.OpenBookStream(FileInStream, SheetName);
+        if ErrorMessage <> '' then
+            Error(ErrorMessage);
+
+        TempExcelBuffer.ReadSheet();
+        rn := 1;
+        if TempExcelBuffer.FindSet() then
+            repeat
+                rn += 1;
+                insertdataped(rn);
+            until TempExcelBuffer.Next() < 1;
+    end;
+
+
+
+    procedure insertdataped(rowNo: Integer)
+    var
+        dtxt: Text;
+        no: code[20];
+        ser: text[100];
+        ile: record "Item Ledger Entry";
+    begin
+
+        evaluate(no, GetValueAtCell(rowNo, 1));
+        evaluate(ser, GetValueAtCell(rowNo, 2));
+        ile.SetRange("Item No.", no);
+        ile.SetRange("Serial No.", ser);
+
+        if ile.FindFirst() then begin
+            dtxt := GetValueAtCell(rowNo, 3);
+            REPEAT
+                ile.validate(FBM_Pedimento_2, dtxt);
+                //ile.validate(FBM_Pedimentobis, GetValueAtCell(rowNo, 3));
+                ile.Modify();
+            UNTIL ile.next = 0;
+        end;
+        commit;
+
+    end;
+
+    procedure fixppi(rr: Boolean; ndoc: code[20])
+    var
+        pinv: record "Purch. Inv. Header";
+        gle: record "G/L Entry";
+        ve: record "VAT Entry";
+        vle: record "Vendor Ledger Entry";
+        dvle: record "Detailed Vendor Ledg. Entry";
+        fale: record "FA Ledger Entry";
+        cf: Decimal;
+        exr: record "Currency Exchange Rate";
+        linv: record "Purch. Inv. Line";
+        rate: decimal;
+        edate: date;
+        fad: record "FA Depreciation Book";
+    begin
+        pinv.SetRange("No.", ndoc);
+        if pinv.FindFirst() then begin
+            cf := pinv."Currency Factor";
+            gle.SetRange("Document No.", ndoc);
+            if gle.FindFirst() then
+                if rr then
+                    repeat
+                        gle.Validate(Amount, round(gle.Amount * cf, 1));
+
+                        gle."Additional-Currency Amount" := gle.Amount / CF;
+                        gle.Modify();
+                    until gle.next = 0
+                else begin
+                    linv.setrange("Document No.", ndoc);
+
+                    repeat
+
+                        if linv.FindFirst() then begin
+                            gle.Validate(Amount, linv.Amount);
+
+                            gle."Additional-Currency Amount" := gle.Amount / CF;
+                            gle.Modify();
+                            linv.Next();
+                        end;
+                    until gle.next = 0;
+                end;
+
+            ve.SetRange("Document No.", ndoc);
+            if ve.FindFirst() then
+                if rr then
+                    repeat
+
+                        ve.Validate(base, round(ve.base * cf, 1));
+
+                        ve.Modify();
+                    until ve.Next() = 0
+                else begin
+                    linv.setrange("Document No.", ndoc);
+
+                    repeat
+
+                        if linv.FindFirst() then
+                            ve.Validate(Amount, linv.Amount);
+                        ve.Modify();
+                        linv.Next();
+                    until ve.next = 0;
+                end;
+
+            vle.SetRange("Document No.", ndoc);
+            if vle.FindFirst() then
+                if rr then begin
+                    vle."Amount (LCY)" := vle."Original Amount";
+
+                    vle.Modify(false);
+                end;
+            dvle.SetRange("Document No.", ndoc);
+            if dvle.FindFirst() then begin
+                dvle."Amount (LCY)" := dvle."Amount";
+
+                dvle.Modify();
+            end;
+            dvle.reset;
+            DVLE.SetRange("Vendor Ledger Entry No.", VLE."Entry No.");
+            IF DVLE.FindFirst() then
+                repeat
+                    dvle."Amount (LCY)" := dvle.Amount;
+                    dvle.Modify();
+                until dvle.next = 0;
+            ;
+            fale.SetRange("Document No.", ndoc);
+
+            if fale.FindFirst() then
+                if rr then
+                    repeat
+                        fale.Validate(Amount, round(fale.Amount * cf, 1));
+
+                        fale.Modify();
+                    until fale.next = 0
+                else begin
+                    linv.setrange("Document No.", ndoc);
+
+                    repeat
+
+                        if linv.FindFirst() then
+                            fale.Validate(Amount, linv.Amount);
+                        fale.Modify();
+                        linv.Next();
+                    until fale.next = 0;
+                end;
+
+
+            pinv."Currency Factor" := 1;
+            pinv.Modify();
+
+        end;
+        fad.SetRange("FA No.", 'FA00047');
+        if fad.FindFirst() then begin
+            fad."Disposal Date" := 0D;
+            fad.Modify();
+        end;
     end;
 }

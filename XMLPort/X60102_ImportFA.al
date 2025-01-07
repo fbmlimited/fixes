@@ -1,4 +1,4 @@
-xmlport 60102 FBM_ImportFA
+xmlport 60112 FBM_ImportFA
 {
     FieldSeparator = ';';
     Format = VariableText;
